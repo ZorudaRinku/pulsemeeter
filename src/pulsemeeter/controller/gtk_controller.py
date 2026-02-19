@@ -91,6 +91,7 @@ class GtkController(SignalModel):
 
         self.create_content(self.config_model.layout)
         self.window = Gtk.Window(title='Pulsemeeter', application=application)
+        self.window.set_default_size(self.config_model.window_width, self.config_model.window_height)
         self.window.set_child(self.content)
         self.connect_window_gtk_events()
 
@@ -163,7 +164,9 @@ class GtkController(SignalModel):
         '''
         Called when the main window gets destroyed
         '''
-        pass
+        width, height = self.window.get_default_size()
+        self.config_model.window_width = width
+        self.config_model.window_height = height
 
     def reload_connection_widgets(self):
         '''
