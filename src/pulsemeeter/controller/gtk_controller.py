@@ -232,8 +232,8 @@ class GtkController(SignalModel):
 
     def load_app_combobox(self):
         self.block_app_combobox_handlers(True)
-        sink_input_device_list = []
-        source_output_device_list = []
+        sink_input_device_list = [('', '')]
+        source_output_device_list = [('', '')]
 
         for device in self.device_repository.get_devices_by_type('vi').values():
             sink_input_device_list.append((device.nick, device.name))
