@@ -153,12 +153,14 @@ class GtkController(SignalModel):
         self.append_app_combobox(device_model)
 
     def on_device_widget_destroy(self, _, device_type, device_id):
-        self.stop_vumeter(device_type, device_id)
-        del self.device_handlers[device_type][device_id]
+        if device_id in self.vumeter_tasks.get(device_type, {}):
+            self.stop_vumeter(device_type, device_id)
+        self.device_handlers[device_type].pop(device_id, None)
 
     def on_app_widget_destroy(self, _, app_type, app_id):
-        self.stop_vumeter(app_type, app_id)
-        del self.app_handlers[app_type][app_id]
+        if app_id in self.vumeter_tasks.get(app_type, {}):
+            self.stop_vumeter(app_type, app_id)
+        self.app_handlers[app_type].pop(app_id, None)
 
     def on_window_destroy(self, _):
         '''
@@ -277,10 +279,62 @@ class GtkController(SignalModel):
         self.content.settings_box.fill_settings(self.config_model)
 
     def settings_menu_apply(self, _, config_schema):
+        vumeters_changed = self.config_model.vumeters != config_schema['vumeters']
         self.config_model.vumeters = config_schema['vumeters']
         self.config_model.cleanup = config_schema['cleanup']
         self.config_model.tray = config_schema['tray']
+        layout_changed = self.config_model.layout != config_schema['layout']
         self.config_model.layout = config_schema['layout']
+        if layout_changed:
+            self.rebuild_content()
+        elif vumeters_changed:
+            if self.config_model.vumeters:
+                self.start_all_vumeters()
+            else:
+                self.stop_all_vumeters()
+
+    def stop_all_vumeters(self):
+        for device_type in ('a', 'b', 'vi', 'hi'):
+            for task in self.vumeter_tasks[device_type].values():
+                task.cancel()
+            self.vumeter_tasks[device_type].clear()
+            for device_widget in self.content.device_box[device_type].widgets.values():
+                device_widget.vumeter_widget.set_fraction(0)
+        for app_type in ('sink_input', 'source_output'):
+            for task in self.vumeter_tasks[app_type].values():
+                task.cancel()
+            self.vumeter_tasks[app_type].clear()
+            for app_widget in self.content.app_box[app_type].widgets.values():
+                app_widget.vumeter_widget.set_fraction(0)
+
+    def start_all_vumeters(self):
+        for device_type in ('a', 'b', 'vi', 'hi'):
+            for device_id, device_widget in self.content.device_box[device_type].widgets.items():
+                pa_device_type = device_widget.device_model.device_type
+                vumeter = self.start_vumeter(pa_device_type, device_widget.device_model.name, device_widget.vumeter_widget)
+                self.vumeter_tasks[device_type][device_id] = vumeter
+        for app_type in ('sink_input', 'source_output'):
+            for app_index, app_widget in self.content.app_box[app_type].widgets.items():
+                stream_type = app_type.split('_')[0]
+                vumeter = self.start_vumeter(stream_type, app_widget.app_model.label + str(app_widget.app_model.index), app_widget.vumeter_widget, app_index)
+                self.vumeter_tasks[app_type][app_index] = vumeter
+
+    def rebuild_content(self):
+        self.stop_all_vumeters()
+
+        # Clear handler references (old widgets being destroyed)
+        for device_type in ('a', 'b', 'vi', 'hi'):
+            self.device_handlers[device_type].clear()
+        for app_type in ('sink_input', 'source_output'):
+            self.app_handlers[app_type].clear()
+
+        # Build new content with the new layout and swap it in
+        self.create_content(self.config_model.layout)
+        self.window.set_child(self.content)
+
+        # Repopulate all device and app widgets
+        self.load_device_list()
+        self.load_app_list()
 
     def connect_window_gtk_events(self):
         '''
