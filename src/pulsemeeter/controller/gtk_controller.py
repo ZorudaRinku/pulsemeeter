@@ -110,6 +110,7 @@ class GtkController(SignalModel):
         #     arrange_device_popover(popover)
 
         self.connect_content_gtk_events()
+        self.content.settings_box.fill_settings(self.config_model)
         return self.content
 
     def create_device_widget(self, device_type, device_id, device_model, refresh=False):
