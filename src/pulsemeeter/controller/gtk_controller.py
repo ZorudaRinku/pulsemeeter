@@ -16,7 +16,8 @@ from pulsemeeter.clients.gtk.layouts import layout_manager
 # from pulsemeeter.clients.gtk import layouts
 from pulsemeeter.clients.gtk.widgets.content import Content
 from pulsemeeter.clients.gtk.widgets.device.device_widget import DeviceWidget
-from pulsemeeter.clients.gtk.widgets.app.app_widget import AppWidget, AppCombobox
+from pulsemeeter.clients.gtk.widgets.app.app_widget import AppWidget
+from pulsemeeter.clients.gtk.widgets.app.app_dropdown import AppDropDown
 # from pulsemeeter.settings import STYLE_FILE
 
 # pylint: disable=wrong-import-order,wrong-import-position
@@ -245,26 +246,26 @@ class GtkController(SignalModel):
         for device in self.device_repository.get_devices_by_type('b').values():
             source_output_device_list.append((device.nick, device.name))
 
-        AppCombobox.set_device_list('sink_input', sink_input_device_list)
-        AppCombobox.set_device_list('source_output', source_output_device_list)
+        AppDropDown.set_device_list('sink_input', sink_input_device_list)
+        AppDropDown.set_device_list('source_output', source_output_device_list)
         self.block_app_combobox_handlers(False)
 
     def append_app_combobox(self, device):
         self.block_app_combobox_handlers(True)
         if device.device_type == 'sink':
-            AppCombobox.append_device_list('sink_input', (device.nick, device.name))
-            AppCombobox.append_device_list('source_output', (device.nick + '.monitor', device.name))
+            AppDropDown.append_device_list('sink_input', (device.nick, device.name))
+            AppDropDown.append_device_list('source_output', (device.nick + '.monitor', device.name))
         else:
-            AppCombobox.append_device_list('source_output', (device.nick, device.name))
+            AppDropDown.append_device_list('source_output', (device.nick, device.name))
         self.block_app_combobox_handlers(False)
 
     def pop_app_combobox(self, device):
         self.block_app_combobox_handlers(True)
         if device.device_type == 'sink':
-            AppCombobox.remove_device_list('sink_input', (device.nick, device.name))
-            AppCombobox.remove_device_list('source_output', (device.nick + '.monitor', device.name))
+            AppDropDown.remove_device_list('sink_input', (device.nick, device.name))
+            AppDropDown.remove_device_list('source_output', (device.nick + '.monitor', device.name))
         else:
-            AppCombobox.remove_device_list('source_output', (device.nick, device.name))
+            AppDropDown.remove_device_list('source_output', (device.nick, device.name))
         self.block_app_combobox_handlers(False)
 
     def block_app_combobox_handlers(self, state):
