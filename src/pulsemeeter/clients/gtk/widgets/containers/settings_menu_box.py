@@ -19,7 +19,7 @@ class SettingsMenuBox(Gtk.Box):
     vumeters: Gtk.CheckButton
     cleanup: bool = False
     tray: bool = False
-    layout: str = 'blocks'
+    layout: str = 'Blocks'
 
     __gsignals__ = {
         "settings_change": (GObject.SIGNAL_RUN_FIRST, GObject.TYPE_NONE, (GObject.TYPE_PYOBJECT,))
