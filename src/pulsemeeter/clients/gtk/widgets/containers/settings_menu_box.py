@@ -32,7 +32,7 @@ class SettingsMenuBox(Gtk.Box):
         self.vumeters = Gtk.CheckButton(label=_('Enable VU Meters'))
         self.cleanup = Gtk.CheckButton(label=_('Enable Cleanup'))
         self.tray = Gtk.CheckButton(label=_('Enable Tray'))
-        self.layout = LabeledDropDown(_('Layout'))
+        self.layout = LabeledDropDown(_('Layout '))
         # self.vumeters = Gtk.CheckButton(active=config_model.vumeters, label=_('Enable VU Meters'))
         # self.cleanup = Gtk.CheckButton(active=config_model.cleanup, label=_('Enable Cleanup'))
         # self.tray = Gtk.CheckButton(active=config_model.tray, label=_('Enable Tray'))

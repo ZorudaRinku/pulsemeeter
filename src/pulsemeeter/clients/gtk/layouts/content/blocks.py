@@ -73,7 +73,8 @@ def arrange_widgets(content):
     settings_popover.set_child(content.settings_box)
     content.settings_button.set_popover(settings_popover)
 
-    settings_box = Gtk.Box(halign=Gtk.Align.END, valign=Gtk.Align.START, vexpand=False)
+    settings_box = Gtk.Box(halign=Gtk.Align.END, valign=Gtk.Align.START, vexpand=False,
+                           margin_top=6, margin_end=6)
     settings_box.append(content.settings_button)
 
     scrolled = Gtk.ScrolledWindow(hexpand=True, vexpand=True)
